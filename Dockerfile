@@ -1,13 +1,21 @@
-# Wybór podstawowego obrazu
+# Wybór obrazu bazowego
+FROM node:16 AS build
+
+# Ustawienie katalogu roboczego
+WORKDIR /app
+
+# Kopiowanie plików do obrazu
+COPY package.json  ./
+RUN npm install
+
+# Kopiowanie całej aplikacji
+COPY . .
+
+# Budowanie aplikacji
+RUN npm run build
+
+# Wdrażanie za pomocą Nginx
 FROM nginx:latest
-
-# Usunięcie domyślnej konfiguracji Nginx
-RUN rm -rf /usr/share/nginx/html/*
-
-# Kopiowanie plików projektu do kontenera
-COPY src/ /usr/share/nginx/html/
-
-# Eksponowanie portu 80
+COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
